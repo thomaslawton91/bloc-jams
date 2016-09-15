@@ -56,6 +56,8 @@ var createSongRow = function(songNumber, songName, songLength) {
 		setSong(songNumber);
         currentSoundFile.play();
         
+        updateSeekBarWhileSongPlays();
+        
         var $volumeFill = $('.volume .fill');
         var $volumeThumb = $('.volume .thumb');
         $volumeFill.width(currentVolume + '%');
@@ -69,6 +71,8 @@ var createSongRow = function(songNumber, songName, songLength) {
                 $(this).html(pauseButtonTemplate);
                 $('.main-controls .play-pause').html(playerBarPauseButton);
                 currentSoundFile.play();
+                updateSeekBarWhileSongPlays();
+                
             } else {
                 $(this).html(playButtonTemplate);
                 $('.main-controls .play-pause').html(playerBarPlayButton);
@@ -150,9 +154,38 @@ var updateSeekBarWhileSongPlays = function() {
              var $seekBar = $('.seek-control .seek-bar');
  
              updateSeekPercentage($seekBar, seekBarFillRatio);
+             setCurrentTimeInPlayerBar();
+             setTotalTimeInPlayerBar();
          });
      }
  };
+
+var setCurrentTimeInPlayerBar = function(currentTime) {
+    
+    var $currentTimeDiv = $('div.current-time');
+    var currentTime = currentSoundFile.getTime();
+    var test = $currentTimeDiv.text(currentTime);
+    filterTimeCode(test);
+};
+
+var setTotalTimeInPlayerBar = function(totalTime) {
+    
+    $('div.total-time').text(currentSoundFile.getDuration);
+};
+
+var filterTimeCode = function(timeInSeconds) {
+    
+    var strToNum = timeInSeconds;
+    var hour = Math.floor(strToNum / 3600);
+    var min = Math.floor((strToNum - (hours * 3600)) / 60);
+    var sec = strToNum - (hour * 3600) - (min *60);
+    
+    sec = Math.round(sec * 100) /100;
+    
+    var result = (min < 10 ? "0" + min : min);
+        result += ":" (sec < 10 ? "0" + sec : sec);
+    return result
+};
 
 var setupSeekBars = function() {
      var $seekBars = $('.player-bar .seek-bar');
@@ -221,6 +254,7 @@ var nextSong = function() {
     setSong(currentSongIndex + 1);
     currentSoundFile.play();
     updatePlayerBarSong();
+    updateSeekBarWhileSongPlays();
     
     $('.currently-playing .song-name').text(currentSongFromAlbum.title);
     $('.currently-playing .artist-name').text(currentAlbum.artist);
@@ -252,6 +286,7 @@ var previousSong = function() {
     setSong(currentSongIndex + 1);
     currentSoundFile.play();
     updatePlayerBarSong();
+    updateSeekBarWhileSongPlays();
     
     $('.currently-playing .song-name').text(currentSongFromAlbum.title);
     $('.currently-playing .artist-name').text(currentAlbum.artist);
@@ -276,9 +311,15 @@ var togglePlayFromPlayerBar = function() {
         
     }
     
-    else {
+    else if (currentSoundFile.isEnded()) {
         
         $('.main-controls .play-pause').html(playerBarPlayButton);
+        currentSoundFile.play();
+    }
+    
+    else {
+        
+        $('.main-controls .play-pause').html(playerBarPauseButton);
         currentSoundFile.pause();
     }
 };
