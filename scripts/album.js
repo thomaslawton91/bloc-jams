@@ -174,17 +174,19 @@ var setTotalTimeInPlayerBar = function(totalTime) {
 };
 
 var filterTimeCode = function(timeInSeconds) {
+    var seconds = Number.parseFloat(timeInSeconds);
+    var wholeSeconds = Math.floor(seconds);
+    var minutes = Math.floor(wholeSeconds / 60);
     
-    var strToNum = timeInSeconds;
-    var hour = Math.floor(strToNum / 3600);
-    var min = Math.floor((strToNum - (hours * 3600)) / 60);
-    var sec = strToNum - (hour * 3600) - (min *60);
+    var remainingSeconds = wholeSeconds % 60;
+    var output = minutes + ':';
     
-    sec = Math.round(sec * 100) /100;
+    if (remainingSeconds < 10) {
+        output += '0';   
+    }
     
-    var result = (min < 10 ? "0" + min : min);
-        result += ":" (sec < 10 ? "0" + sec : sec);
-    return result
+    output += remainingSeconds;
+    return output;
 };
 
 var setupSeekBars = function() {
